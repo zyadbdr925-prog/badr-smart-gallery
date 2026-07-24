@@ -3,648 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام بدر يمن سوفت ERP - إصدار الدورة المستندية والطباعة والتصدير</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <title>معرض بدر الذكي لحفظ الصور والمستندات</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=300;400;600;700;800;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
-        .sidebar-active { background-color: #0f172a; border-right: 4px solid #f59e0b; color: #f59e0b; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        
-        /* تنسيق خاص للطباعة */
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; color: black; }
-            main { overflow: visible !important; }
-            .print-area { display: block !important; width: 100% !important; border: none !important; box-shadow: none !important; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --border-color: #334155;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2rem;
+            color: #60a5fa;
+        }
+
+        header p {
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .upload-group, .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="file"], input[type="text"], select {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 180px;
+            background: #090d16;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .doc-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #93c5fd;
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+            background: #1e293b;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .doc-preview svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+            fill: #60a5fa;
+        }
+
+        .item-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-title {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .tag-badge {
+            background: #334155;
+            color: #93c5fd;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+        }
+
+        .download-btn {
+            background: #10b981;
+        }
+        .download-btn:hover {
+            background: #059669;
+        }
+
+        .delete-btn {
+            background: var(--danger-color);
+        }
+        .delete-btn:hover {
+            background: #dc2626;
         }
     </style>
 </head>
-<body class="text-gray-800 flex h-screen overflow-hidden">
+<body>
 
-    <aside class="w-72 bg-slate-900 text-slate-100 flex flex-col justify-between shadow-2xl z-20 no-print">
-        <div>
-            <div class="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="bg-amber-500 text-slate-900 p-2 rounded-lg font-black text-xl">YS</div>
-                    <div>
-                        <h2 class="font-extrabold text-sm leading-tight text-white">بدر يمن سوفت ERP</h2>
-                        <p class="text-[9px] text-amber-500 font-bold">نظام الرقابة والطباعة والتصدير</p>
-                    </div>
-                </div>
-                <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-bold">V3.0</span>
-            </div>
-
-            <nav class="p-3 space-y-1 overflow-y-auto max-h-[80vh]">
-                <p class="text-[10px] text-slate-500 px-3 uppercase font-bold tracking-wider mb-1">التهيئة والنظام</p>
-                <button onclick="switchSystemTab('dashboard')" id="btn-dashboard" class="sidebar-active w-full text-right py-2 px-3 rounded text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-gauge-high w-4"></i> لوحة التحكم والتحليلات
-                </button>
-                <button onclick="switchSystemTab('cost-centers')" id="btn-cost-centers" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-layer-group w-4 text-emerald-400"></i> دليل مراكز التكلفة
-                </button>
-
-                <p class="text-[10px] text-slate-500 px-3 uppercase font-bold tracking-wider pt-2 mb-1">إدارة الأستاذ العام</p>
-                <button onclick="switchSystemTab('chart-accounts')" id="btn-chart-accounts" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-folder-tree w-4 text-sky-400"></i> شجرة الحسابات والدليل
-                </button>
-                <button onclick="switchSystemTab('journal-entries')" id="btn-journal-entries" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-calculator w-4 text-purple-400"></i> قيود اليومية المحاسبية
-                </button>
-                <button onclick="switchSystemTab('vouchers-new')" id="btn-vouchers-new" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-receipt w-4 text-teal-400"></i> سندات الصرف والقبض
-                </button>
-
-                <p class="text-[10px] text-slate-500 px-3 uppercase font-bold tracking-wider pt-2 mb-1">سلاسل الإمداد والتجارة</p>
-                <button onclick="switchSystemTab('inventory')" id="btn-inventory" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-boxes-stacked w-4 text-amber-400"></i> إدارة المخزون وبطاقة الصنف
-                </button>
-                <button onclick="switchSystemTab('procurement-orders')" id="btn-procurement-orders" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-file-contract w-4 text-indigo-400"></i> أوامر الشراء والطلب
-                </button>
-                <button onclick="switchSystemTab('purchases')" id="btn-purchases" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-cart-flatbed-suitcase w-4 text-violet-400"></i> فواتير المشتريات والإنزال
-                </button>
-                <button onclick="switchSystemTab('sales-orders')" id="btn-sales-orders" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-paste w-4 text-rose-400"></i> عروض وأوامر مبيعات العملاء
-                </button>
-                <button onclick="switchSystemTab('sales-billing')" id="btn-sales-billing" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-cash-register w-4 text-blue-400"></i> فواتير المبيعات ونقاط البيع
-                </button>
-
-                <p class="text-[10px] text-slate-500 px-3 uppercase font-bold tracking-wider pt-2 mb-1">الرقابة والختاميات</p>
-                <button onclick="switchSystemTab('approvals-manager')" id="btn-approvals-manager" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5 relative">
-                    <i class="fa-solid fa-shield-halved w-4 text-red-400"></i> نظام الاعتمادات والترحيل
-                    <span id="pending-approval-badge" class="absolute left-3 top-2.5 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full hidden font-bold">0</span>
-                </button>
-                <button onclick="switchSystemTab('reports-center')" id="btn-reports-center" class="w-full text-right py-2 px-3 rounded hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2.5">
-                    <i class="fa-solid fa-print w-4 text-gray-400"></i> كشوفات الحساب والتقارير
-                </button>
-            </nav>
-        </div>
-        <div class="p-3 bg-slate-950 text-center border-t border-slate-800">
-            <p class="text-[10px] text-slate-400">تطوير مخصص لأعمال د. بدر زياد 2026م</p>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center no-print shadow-sm">
-            <div class="flex items-center gap-4">
-                <span class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-md font-bold shadow-sm">
-                    <i class="fa-solid fa-building-flag text-blue-600 mr-1"></i> الفرع: المحلات الرئيسية - خمر (عمران)
-                </span>
-                <span class="text-xs bg-amber-50 text-amber-700 px-3 py-1.5 rounded-md font-bold border border-amber-200">
-                    <i class="fa-solid fa-calendar-days mr-1"></i> فترة مالية نشطة: 2026م
-                </span>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="text-left">
-                    <p class="text-[10px] text-gray-400">المشرف العام الإداري</p>
-                    <p class="text-xs font-black text-slate-950">د. بدر زياد</p>
-                </div>
-                <div class="w-9 h-9 bg-amber-500 text-slate-950 rounded-full flex items-center justify-center font-black shadow-sm text-sm">ب</div>
-            </div>
+    <div class="container">
+        <header>
+            <h1>معرض بدر الذكي لحفظ الصور والمستندات</h1>
+            <p>إدارة وتنظيم صورك وملفاتك المهنية والشخصية بكل أمان وسلاسة</p>
         </header>
 
-        <div class="p-6 flex-1 overflow-y-auto max-w-7xl w-full mx-auto space-y-6">
-
-            <section id="tab-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                        <p class="text-xs font-bold text-gray-400">صندوق المحلات (YER)</p>
-                        <p class="text-2xl font-black text-slate-900 mt-1" id="dash-yer-box">2,450,000 YER</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                        <p class="text-xs font-bold text-gray-400">الصندوق بالريال السعودي</p>
-                        <p class="text-2xl font-black text-emerald-600 mt-1" id="dash-sar-box">12,500 SAR</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                        <p class="text-xs font-bold text-gray-400">قيمة بضاعة المخازن</p>
-                        <p class="text-2xl font-black text-blue-600 mt-1" id="dash-inventory-valuation">725,480 YER</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm col-span-1">
-                        <p class="text-xs font-bold text-gray-400">عمليات معلقة بانتظار الترحيل</p>
-                        <p class="text-2xl font-black text-red-500 mt-1" id="dash-pending-count">3 مستندات</p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm space-y-4">
-                    <h3 class="font-extrabold text-sm text-slate-800 border-b pb-3"><i class="fa-solid fa-shield-halved text-amber-500"></i> حالة الترابط والرقابة والأمان</h3>
-                    <p class="text-xs text-gray-500">تم تفعيل الدورة المستندية الإلزامية: لا يؤثر أي مستند مالي أو مخزني على الأستاذ العام إلا بعد اعتماده وترحيله من شاشة "نظام الاعتمادات والترحيل".</p>
-                </div>
-            </section>
-
-            <section id="tab-cost-centers" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm" id="cc-report-area">
-                    <div class="flex justify-between items-center border-b pb-4 mb-4 no-print">
-                        <div>
-                            <h3 class="font-extrabold text-slate-800 text-sm"><i class="fa-solid fa-layer-group text-emerald-500"></i> دليل وهيكلية مراكز التكلفة</h3>
-                            <p class="text-[11px] text-gray-400">توزيع الإيرادات والمصروفات حسب الأقسام والفروع والمشاريع</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="exportTableToExcel('costCentersTable', 'دليل_مراكز_التكلفة')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded flex items-center gap-1.5"><i class="fa-solid fa-file-excel"></i> إكسل</button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right text-xs" id="costCentersTable">
-                            <thead>
-                                <tr class="bg-slate-100 text-gray-600">
-                                    <th class="p-3">رمز المركز</th>
-                                    <th class="p-3">اسم مركز التكلفة</th>
-                                    <th class="p-3">النوع</th>
-                                    <th class="p-3">المستوى</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b"><td class="p-3">01</td><td class="p-3">مركز الإدارة الرئيسي - خمر</td><td class="p-3">رئيسي</td><td class="p-3">المستوى 1</td></tr>
-                                <tr class="border-b"><td class="p-3">0101</td><td class="p-3">قسم المواد الزراعية والقات</td><td class="p-3">فرعي</td><td class="p-3">المستوى 2</td></tr>
-                                <tr class="border-b"><td class="p-3">0102</td><td class="p-3">قسم الكهرباء والسباكة والبناء</td><td class="p-3">فرعي</td><td class="p-3">المستوى 2</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-chart-accounts" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <div class="flex justify-between items-center border-b pb-4 mb-4">
-                        <h3 class="font-extrabold text-slate-800 text-sm"><i class="fa-solid fa-folder-tree text-sky-400"></i> الدليل المحاسبي وشجرة الحسابات المعتمدة</h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="border rounded-lg bg-slate-50 p-4 h-96 overflow-y-auto">
-                            <div id="accountsTree" class="space-y-2 text-xs">
-                                <div class="cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('1000', 'الأصول', 'رئيسي - طبيعة مدينة')"><i class="fa-solid fa-plus-square text-sky-500 mr-1"></i> 1000 - الأصول</div>
-                                <div class="ps-4 cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('1100', 'الأصول المتداولة', 'رئيسي - تتبع الأصول')"><i class="fa-solid fa-minus-square text-amber-500 mr-1"></i> 1100 - الأصول المتداولة</div>
-                                <div class="ps-8 text-blue-600 font-bold cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('110101', 'صندوق الصراف اليمني (YER)', 'فرعي - رصيد نشط')"><i class="fa-solid fa-file-invoice mr-1"></i> 110101 - صندوق الصراف اليمني (YER)</div>
-                                <div class="ps-8 text-emerald-600 font-bold cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('110102', 'صندوق الصراف السعودي (SAR)', 'فرعي - رصيد نشط')"><i class="fa-solid fa-file-invoice mr-1"></i> 110102 - صندوق الصراف السعودي (SAR)</div>
-                                <div class="ps-8 text-indigo-600 font-bold cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('110201', 'مخزن المواد الرئيسي', 'فرعي - مخازن')"><i class="fa-solid fa-file-invoice mr-1"></i> 110201 - مخزن المواد الرئيسي</div>
-                                <div class="cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('2000', 'الالتزامات', 'رئيسي - طبيعة دائنة')"><i class="fa-solid fa-plus-square text-sky-500 mr-1"></i> 2000 - الالتزامات</div>
-                                <div class="cursor-pointer hover:bg-slate-200 p-1 rounded" onclick="showAccountDetails('3000', 'حقوق الملكية', 'رئيسي - دائنة')"><i class="fa-solid fa-plus-square text-sky-500 mr-1"></i> 3000 - حقوق الملكية</div>
-                            </div>
-                        </div>
-                        <div class="border rounded-lg p-5 space-y-4" id="accountDetailsCard">
-                            <h4 class="font-bold text-xs text-slate-800 border-b pb-2">بيانات تفصيل الحساب المحدد</h4>
-                            <p class="text-gray-600 text-xs">اضغط على أحد الصناديق أو المخازن لتفقد الرصيد والحركة اليومية بشكل مباشر.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-journal-entries" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-4 border-b pb-3"><i class="fa-solid fa-calculator text-purple-500"></i> محرر سندات وقيود اليومية المزدوجة</h3>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">تاريخ القيد</label>
-                                <input type="date" id="je-date" class="w-full p-2 border rounded text-xs" value="2026-07-15">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-bold text-gray-500 mb-1">البيان العام للقيد المحاسبي</label>
-                                <input type="text" id="je-desc" placeholder="البيان العام التوضيحي للعملية..." class="w-full p-2 border rounded text-xs">
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-right text-xs border">
-                                <thead>
-                                    <tr class="bg-slate-100">
-                                        <th class="p-2 border">الحساب المالي</th>
-                                        <th class="p-2 border text-center w-24">مدين</th>
-                                        <th class="p-2 border text-center w-24">دائن</th>
-                                        <th class="p-2 border">مركز التكلفة</th>
-                                        <th class="p-2 border">البيان التحليلي للسطر</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="p-2 border"><select class="w-full p-1 border rounded text-xs"><option>110101 - صندوق الصراف اليمني</option></select></td>
-                                        <td class="p-2 border"><input type="number" class="w-full p-1 border text-center text-xs" value="0"></td>
-                                        <td class="p-2 border"><input type="number" class="w-full p-1 border text-center text-xs" value="50000"></td>
-                                        <td class="p-2 border"><select class="w-full p-1 border text-xs"><option>0101 - قسم المواد الزراعية</option></select></td>
-                                        <td class="p-2 border"><input type="text" class="w-full p-1 border text-xs" value="سداد قيمة مبيدات مستلمة"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button onclick="alert('تم حفظ القيد كمسودة بانتظار الترحيل')" class="w-full bg-slate-900 text-white py-2 rounded text-xs font-bold">حفظ قيد اليومية كـ (مسودة بانتظار الترحيل)</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-vouchers-new" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-4"><i class="fa-solid fa-receipt text-teal-400"></i> سندات الصرف والقبض والتدفق المالي</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-1 border p-4 rounded-xl bg-slate-50 space-y-3 text-xs">
-                            <h4 class="font-bold border-b pb-2">إنشاء سند مالي جديد</h4>
-                            <div>
-                                <label class="block font-bold text-gray-500 mb-1">نوع المعاملة</label>
-                                <select id="v-type" class="w-full p-2 border rounded bg-white font-bold">
-                                    <option value="صرف">سند صرف مالي (صندوق ➜ حساب مستفيد)</option>
-                                    <option value="قبض">سند قبض مالي (حساب دافع ➜ صندوق)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-500 mb-1">صندوق المعاملة</label>
-                                <select id="v-box-acc" class="w-full p-2 border rounded bg-white">
-                                    <option>صندوق الصراف اليمني الرئيسي</option>
-                                    <option>صندوق الصراف السعودي</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-500 mb-1">الطرف الثاني في القيد</label>
-                                <input type="text" id="v-dest-acc" placeholder="المستفيد / العميل" class="w-full p-2 border rounded bg-white">
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block font-bold text-gray-500 mb-1">المبلغ المالي</label>
-                                    <input type="number" id="v-amount" class="w-full p-2 border rounded" placeholder="0">
-                                </div>
-                                <div>
-                                    <label class="block font-bold text-gray-500 mb-1">العملة</label>
-                                    <select id="v-currency" class="w-full p-2 border rounded bg-white font-bold">
-                                        <option value="YER">YER</option>
-                                        <option value="SAR">SAR</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button onclick="saveNewVoucher()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded">حفظ السند</button>
-                        </div>
-                        <div class="lg:col-span-2 border p-4 rounded-xl space-y-4">
-                            <h4 class="font-bold text-xs text-slate-800 border-b pb-2">آخر السندات الصادرة والمعلقة</h4>
-                            <div class="overflow-x-auto text-xs">
-                                <table class="w-full text-right" id="vouchersTable">
-                                    <thead>
-                                        <tr class="bg-slate-100 text-gray-600"><th class="p-2">رقم السند</th><th class="p-2">النوع</th><th class="p-2">المبلغ</th><th class="p-2">المستفيد</th><th class="p-2">الرصد الإداري</th></tr>
-                                    </thead>
-                                    <tbody id="vouchersTableBody">
-                                        <tr class="border-b"><td class="p-2">V-101</td><td class="p-2 text-red-600 font-bold">صرف</td><td class="p-2">12,000 YER</td><td class="p-2">مشتريات خراطيم سباكة</td><td class="p-2 text-amber-600 font-bold">مسودة</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-inventory" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm" id="inventory-report-area">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4 mb-4">
-                        <div>
-                            <h3 class="font-extrabold text-slate-800 text-sm"><i class="fa-solid fa-boxes-stacked text-amber-500"></i> إدارة المخزون وبطاقة الصنف الفعلي</h3>
-                            <p class="text-[11px] text-gray-400">جميع المواد الزراعية، السباكة، والكهرباء المستخرجة من مستندات المستودعات لشهر يوليو 2026م</p>
-                        </div>
-                        <div class="flex items-center gap-2 no-print">
-                            <input type="text" id="inventorySearch" oninput="filterInventoryTable()" placeholder="ابحث باسم الصنف..." class="p-2 border rounded-md text-xs w-64 shadow-sm">
-                            <button onclick="exportTableToExcel('inventoryTable', 'مخزون_بدر_زياد_التجاري')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded flex items-center gap-1.5"><i class="fa-solid fa-file-excel"></i> تصدير إكسل</button>
-                            <button onclick="printInventoryReport()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-3 rounded flex items-center gap-1.5"><i class="fa-solid fa-print"></i> طباعة الكشف</button>
-                        </div>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right text-xs" id="inventoryTable">
-                            <thead>
-                                <tr class="bg-slate-100 text-slate-700 border-b">
-                                    <th class="p-3">رقم الصنف</th>
-                                    <th class="p-3">اسم المنتج / الصنف</th>
-                                    <th class="p-3 text-center">الوحدة والتعبئة</th>
-                                    <th class="p-3 text-center">سعر الوحدة (YER)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- الشاشات الفرعية الإضافية والترحيل -->
-            <section id="tab-procurement-orders" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-2"><i class="fa-solid fa-file-contract text-indigo-500"></i> إدارة أوامر الشراء والطلب</h3>
-                    <p class="text-xs text-gray-500">تقديم طلبات التوريد للأصناف التي أوشكت على النفاد للحد من توقف عمليات المبيعات.</p>
-                </div>
-            </section>
-
-            <section id="tab-purchases" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-2"><i class="fa-solid fa-cart-flatbed-suitcase text-violet-500"></i> فواتير المشتريات والإنزال المباشر</h3>
-                    <p class="text-xs text-gray-500">إدخال الفواتير الموردة وتحديث متوسط التكلفة الحسابية للأصناف تلقائياً.</p>
-                </div>
-            </section>
-
-            <section id="tab-sales-orders" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-2"><i class="fa-solid fa-paste text-rose-500"></i> عروض الأسعار وأوامر التجهيز</h3>
-                    <p class="text-xs text-gray-500">إصدار عروض أسعار رسمية للعملاء وإمكانية إنزالها مباشرة بفاتورة مبيعات لاحقاً.</p>
-                </div>
-            </section>
-
-            <section id="tab-sales-billing" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-4"><i class="fa-solid fa-cash-register text-blue-500"></i> كاونتر إصدار فواتير المبيعات ونقاط البيع</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">العميل</label>
-                            <input type="text" value="عميل نقدي" class="w-full p-2 border rounded text-xs bg-gray-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">طريقة الدفع</label>
-                            <select class="w-full p-2 border rounded text-xs bg-white font-bold">
-                                <option>نقد مالي</option>
-                                <option>آجل (ذمم مدينة)</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-gray-500 mb-1">تنزيل صنف سريع للمبيعات</label>
-                            <select id="salesItemSelector" class="w-full p-2 border rounded text-xs bg-white" onchange="addSaleItemDirectly()">
-                                <option value="">-- اختر من الأصناف المستخرجة والجاهزة --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="border rounded-lg overflow-x-auto text-xs">
-                        <table class="w-full text-right" id="salesBillingTable">
-                            <thead>
-                                <tr class="bg-slate-100"><th class="p-3">اسم الصنف</th><th class="p-3">الكمية</th><th class="p-3">السعر</th><th class="p-3">الإجمالي</th></tr>
-                            </thead>
-                            <tbody id="salesBillingBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-approvals-manager" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-2"><i class="fa-solid fa-shield-halved text-red-500"></i> نظام الرقابة والاعتمادات والترحيل</h3>
-                    <p class="text-xs text-gray-500 mb-4">كافة فواتير المشتريات والمبيعات وسندات الصرف والقبض لا تُرحل للأستاذ العام أو تُعدل أرصدة الصناديق والمخازن الفردية إلا من هنا.</p>
-                    <div id="approvalsListContainer" class="space-y-3">
-                        <!-- تظهر هنا السندات المعلقة للترحيل -->
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-reports-center" class="hidden space-y-6">
-                <div class="bg-white p-5 rounded-xl border shadow-sm">
-                    <h3 class="font-extrabold text-slate-800 text-sm mb-2"><i class="fa-solid fa-print text-gray-500"></i> مركز طباعة التقارير والدورة المحاسبية</h3>
-                    <p class="text-xs text-gray-500">تصدير ميزان المراجعة، قائمة الدخل، وتقارير حركة المخازن والأرصدة.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <button onclick="switchSystemTab('inventory')" class="p-4 border rounded-xl hover:bg-slate-50 text-right flex items-center justify-between">
-                            <div>
-                                <h4 class="font-bold text-xs text-slate-800">تقرير حركة وجرد المخازن الفعلي</h4>
-                                <p class="text-[11px] text-gray-400">سحب فوري لكافة الأصناف المسجلة</p>
-                            </div>
-                            <i class="fa-solid fa-arrow-left text-gray-400"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-
+        <div class="control-panel">
+            <div class="upload-group">
+                <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt">
+                <input type="text" id="tagInput" placeholder="أدخل التصنيف (مثال: فواتير، مشاريع)">
+                <button id="uploadBtn">رفع وحفظ</button>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchInput" placeholder="ابحث في التصنيفات...">
+            </div>
         </div>
-    </main>
+
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
 
     <script>
-        // تعريف الأصناف المستخرجة الفعليّة من مستند مخزون بدر زياد التجاري
-        const extractedInventoryData = [
-            { id: "101", name: "سلك تربيط أبو كجم١,٢", unit: "حبة", price: 791.25 },
-            { id: "102", name: "٢٠٢٠ ٢٠ القوة الفعالة", unit: "قطمة 1 وكيلو 9", price: 12524.90 },
-            { id: "103", name: "التجديد ٢٠", unit: "قطمة وكيلو 4", price: 12184.22 },
-            { id: "104", name: "٣٧ أنبيكا أردني", unit: "قطمة وكيلو 4", price: 14262.24 },
-            { id: "105", name: "٣٧ أردني الدمعة", unit: "قطمة", price: 16227.10 },
-            { id: "106", name: "٣٧ تركي", unit: "قطمة وكيلو 1", price: 19500.00 },
-            { id: "107", name: "٣٧ ميرا فيرت أردني", unit: "قطمة و 3 كيلو", price: 16618.07 },
-            { id: "108", name: "أردني ٣٧", unit: "قطمة", price: 16411.40 },
-            { id: "109", name: "الأثير ٣٧ أردني", unit: "قطمة", price: 16000.00 },
-            { id: "110", name: "التزهير ٣٧", unit: "قطمة 5 وكيلو 7", price: 12629.93 },
-            { id: "111", name: "إيطالي ٣٧", unit: "قطمة", price: 28000.00 },
-            { id: "112", name: "بروتين ٣٧", unit: "قطمة", price: 15000.00 },
-            { id: "113", name: "تركي ٣٧ نيوليف", unit: "قطمة", price: 18673.90 },
-            { id: "114", name: "ريفرنس ٣٧ أردني", unit: "قطمة وكيلو 2", price: 17500.00 },
-            { id: "115", name: "فير ٣٧ كريستال / أسباني", unit: "قطمة وكيلو 1", price: 54815.38 },
-            { id: "116", name: "مغنوم ٣٧ بلس", unit: "قطمة", price: 18800.00 },
-            { id: "117", name: "رایت ٥٢ فاست", unit: "قطمة", price: 34812.07 },
-            { id: "118", name: "آفاكت", unit: "نص كرتون", price: 16114.70 },
-            { id: "119", name: "آفاكت ١٠٠", unit: "كرتون", price: 72416.67 },
-            { id: "120", name: "أيامك", unit: "علبة", price: 60623.83 },
-            { id: "121", name: "أيامك ٢٢", unit: "علبة", price: 3611.67 },
-            { id: "122", name: "سماد هيوميك أسيد", unit: "كجم", price: 4500.00 },
-            { id: "123", name: "خراطيم ري بالتنقيط جودة عالية", unit: "لفة 400 متر", price: 22000.00 },
-            { id: "124", name: "محبس نحاس سباكة 1 إنش", unit: "حبة", price: 3800.00 }
-        ];
+        const fileInput = document.getElementById('fileInput');
+        const tagInput = document.getElementById('tagInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const searchInput = document.getElementById('searchInput');
 
-        let pendingVouchers = [
-            { id: "V-102", type: "صرف", amount: 45000, currency: "YER", beneficiary: "صيانة مضخات خمر المائية", status: "معلق" },
-            { id: "V-103", type: "قبض", amount: 3500, currency: "SAR", beneficiary: "عميل - مبيعات مواد زراعية قات", status: "معلق" }
-        ];
+        let itemsData = JSON.parse(localStorage.getItem('badrSmartGallery')) || [];
 
-        // تهيئة النظام عند التحميل
-        window.onload = function() {
-            populateInventoryTable(extractedInventoryData);
-            populateSalesSelector();
-            updateDashboardMetrics();
-            renderPendingApprovals();
+        function renderGallery(filter = '') {
+            galleryGrid.innerHTML = '';
+            
+            const filteredItems = itemsData.filter(item => 
+                item.tag.toLowerCase().includes(filter.toLowerCase()) || 
+                item.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filteredItems.length === 0) {
+                galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">لا توجد ملفات محفوظة مطابقة للبحث.</p>';
+                return;
+            }
+
+            filteredItems.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                
+                let previewHTML = '';
+                if (item.type.startsWith('image/')) {
+                    previewHTML = `<div class="preview-container"><img src="${item.src}" alt="${item.name}" onclick="window.open('${item.src}')"></div>`;
+                } else {
+                    previewHTML = `
+                        <div class="preview-container">
+                            <a href="${item.src}" download="${item.name}" class="doc-preview">
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                                <span>مستند / ملف</span>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${previewHTML}
+                    <div class="item-info">
+                        <div class="item-meta">
+                            <span class="item-title" title="${item.name}">${item.name}</span>
+                            <span class="tag-badge">${item.tag || 'عام'}</span>
+                        </div>
+                        <div class="actions-row">
+                            <a href="${item.src}" download="${item.name}" class="button btn-sm download-btn" style="text-decoration:none; color:white; display:inline-block;">تحميل</a>
+                            <button class="delete-btn btn-sm" onclick="deleteItem(${item.id})">حذف</button>
+                        </div>
+                    </div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        uploadBtn.addEventListener('click', function() {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('الرجاء اختيار ملف أو صورة أولاً!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newItem = {
+                    id: Date.now(),
+                    name: file.name,
+                    type: file.type,
+                    src: e.target.result,
+                    tag: tagInput.value.trim() || 'عام'
+                };
+
+                itemsData.push(newItem);
+                localStorage.setItem('badrSmartGallery', JSON.stringify(itemsData));
+                
+                fileInput.value = '';
+                tagInput.value = '';
+                renderGallery();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        window.deleteItem = function(id) {
+            itemsData = itemsData.filter(item => item.id !== id);
+            localStorage.setItem('badrSmartGallery', JSON.stringify(itemsData));
+            renderGallery(searchInput.value);
         };
 
-        // التبديل بين شاشات النظام
-        function switchSystemTab(tabId) {
-            const sections = document.querySelectorAll('main section');
-            sections.forEach(sec => sec.classList.add('hidden'));
-            
-            const activeSection = document.getElementById(`tab-${tabId}`);
-            if (activeSection) activeSection.classList.remove('hidden');
+        searchInput.addEventListener('input', function(e) {
+            renderGallery(e.target.value);
+        });
 
-            const buttons = document.querySelectorAll('aside nav button');
-            buttons.forEach(btn => btn.classList.remove('sidebar-active', 'bg-slate-900', 'text-amber-500'));
-            
-            const activeBtn = document.getElementById(`btn-${tabId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('sidebar-active');
-            }
-        }
-
-        // بناء جدول المخزون
-        function populateInventoryTable(data) {
-            const body = document.getElementById('inventoryTableBody');
-            body.innerHTML = '';
-            data.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-3 font-mono text-gray-500">${item.id}</td>
-                    <td class="p-3 font-bold text-slate-800">${item.name}</td>
-                    <td class="p-3 text-center text-slate-600">${item.unit || 'حبة'}</td>
-                    <td class="p-3 text-center font-semibold text-blue-600">${item.price.toLocaleString()} YER</td>
-                `;
-                body.appendChild(tr);
-            });
-        }
-
-        // تصفية المخزون في البحث السريع
-        function filterInventoryTable() {
-            const query = document.getElementById('inventorySearch').value.toLowerCase();
-            const filtered = extractedInventoryData.filter(item => item.name.toLowerCase().includes(query));
-            populateInventoryTable(filtered);
-        }
-
-        // تصدير الجداول إلى إكسل
-        function exportTableToExcel(tableId, filename) {
-            const table = document.getElementById(tableId);
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-            XLSX.writeFile(wb, `${filename}_2026.xlsx`);
-        }
-
-        // طباعة التقارير
-        function printInventoryReport() {
-            window.print();
-        }
-
-        // تفاصيل الحسابات عند النقر على الشجرة
-        function showAccountDetails(code, name, type) {
-            const detailsCard = document.getElementById('accountDetailsCard');
-            detailsCard.innerHTML = `
-                <h4 class="font-bold text-xs text-slate-900 border-b pb-2"><i class="fa-solid fa-circle-info text-blue-500"></i> ${name} (${code})</h4>
-                <div class="space-y-2 text-xs">
-                    <p class="text-gray-600"><strong>تصنيف الحساب:</strong> ${type}</p>
-                    <p class="text-gray-600"><strong>حالة الترابط:</strong> متصل بالدفاتر الرئيسية</p>
-                    <p class="text-emerald-600 font-bold"><strong>الرصيد الفعلي الحالي:</strong> خاضع لمطابقة الترحيل اليومي</p>
-                </div>
-            `;
-        }
-
-        // كاونتر المبيعات السريعة
-        function populateSalesSelector() {
-            const selector = document.getElementById('salesItemSelector');
-            extractedInventoryData.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.textContent = `${item.name} (${item.price} YER)`;
-                selector.appendChild(opt);
-            });
-        }
-
-        function addSaleItemDirectly() {
-            const selector = document.getElementById('salesItemSelector');
-            const itemId = selector.value;
-            if (!itemId) return;
-
-            const item = extractedInventoryData.find(i => i.id === itemId);
-            if (item) {
-                const body = document.getElementById('salesBillingBody');
-                const tr = document.createElement('tr');
-                tr.className = "border-b";
-                tr.innerHTML = `
-                    <td class="p-3 font-bold">${item.name}</td>
-                    <td class="p-3"><input type="number" value="1" class="w-12 border p-1 text-center rounded"></td>
-                    <td class="p-3">${item.price.toLocaleString()} YER</td>
-                    <td class="p-3 font-bold text-blue-600">${item.price.toLocaleString()} YER</td>
-                `;
-                body.appendChild(tr);
-            }
-            selector.value = '';
-        }
-
-        // معالجة وإضافة السندات الجديدة
-        function saveNewVoucher() {
-            const type = document.getElementById('v-type').value;
-            const amount = parseFloat(document.getElementById('v-amount').value) || 0;
-            const currency = document.getElementById('v-currency').value;
-            const dest = document.getElementById('v-dest-acc').value || 'مستفيد غير محدد';
-
-            if (amount <= 0) {
-                alert('الرجاء إدخال مبلغ صحيح أكبر من الصفر');
-                return;
-            }
-
-            const newV = {
-                id: `V-${Date.now().toString().slice(-3)}`,
-                type: type,
-                amount: amount,
-                currency: currency,
-                beneficiary: dest,
-                status: "معلق"
-            };
-
-            pendingVouchers.push(newV);
-            renderPendingApprovals();
-            updateDashboardMetrics();
-
-            // إضافة لجدول الاستعراض
-            const tbody = document.getElementById('vouchersTableBody');
-            const tr = document.createElement('tr');
-            tr.className = "border-b";
-            tr.innerHTML = `
-                <td class="p-2">${newV.id}</td>
-                <td class="p-2 ${type === 'صرف' ? 'text-red-600' : 'text-green-600'} font-bold">${type}</td>
-                <td class="p-2">${amount.toLocaleString()} ${currency}</td>
-                <td class="p-2">${dest}</td>
-                <td class="p-2 text-amber-600 font-bold">مسودة معلقة</td>
-            `;
-            tbody.insertBefore(tr, tbody.firstChild);
-
-            alert('تم حفظ السند بنجاح كمسودة، وتم نقله لنظام الاعتمادات والترحيل لأغراض الرقابة الثنائية.');
-            
-            // تصفير المدخلات
-            document.getElementById('v-amount').value = '';
-            document.getElementById('v-dest-acc').value = '';
-        }
-
-        // عرض السندات المعلقة في نظام الاعتمادات
-        function renderPendingApprovals() {
-            const container = document.getElementById('approvalsListContainer');
-            const badge = document.getElementById('pending-approval-badge');
-            
-            if (pendingVouchers.length === 0) {
-                container.innerHTML = `
-                    <div class="border rounded-xl p-4 bg-slate-50 text-center py-10">
-                        <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-3"></i>
-                        <p class="text-xs font-bold text-slate-800">جميع المستندات المرحلة حالياً مؤمنة بالكامل بالدورة المستندية.</p>
-                    </div>
-                `;
-                badge.classList.add('hidden');
-                return;
-            }
-
-            badge.textContent = pendingVouchers.length;
-            badge.classList.remove('hidden');
-
-            container.innerHTML = '';
-            pendingVouchers.forEach((v, index) => {
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200 shadow-sm";
-                div.innerHTML = `
-                    <div class="text-right">
-                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold">${v.id}</span>
-                        <h4 class="font-bold text-xs text-slate-900 mt-1">${v.beneficiary}</h4>
-                        <p class="text-[10px] text-gray-400">القيمة: <strong class="text-slate-800">${v.amount.toLocaleString()} ${v.currency}</strong> | العملية: ${v.type}</p>
-                    </div>
-                    <button onclick="approveVoucher(${index})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded transition">
-                        <i class="fa-solid fa-check-circle"></i> اعتماد وترحيل مالي
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // اعتماد وترحيل السند لتحديث الصناديق والأستاذ العام
-        function approveVoucher(index) {
-            const voucher = pendingVouchers[index];
-            alert(`تم اعتماد السند ${voucher.id} وترحيله بنجاح إلى حسابات الأستاذ العام وتعديل أرصدة الصناديق.`);
-            pendingVouchers.splice(index, 1);
-            renderPendingApprovals();
-            updateDashboardMetrics();
-        }
-
-        // تحديث إحصائيات لوحة التحكم
-        function updateDashboardMetrics() {
-            document.getElementById('dash-pending-count').textContent = `${pendingVouchers.length} مستندات`;
-        }
+        renderGallery();
     </script>
 </body>
 </html>
